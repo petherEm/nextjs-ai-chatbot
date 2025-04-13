@@ -25,24 +25,31 @@ import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
+import { generateObject } from 'ai';
+import { z } from 'zod';
 
 export const maxDuration = 60;
+console.log("API route registered");
 
 export async function POST(request: Request) {
+  console.log('POST /api/chat received');
   try {
+    const body = await request.json();
+    console.log('Request body parsed successfully');
+    
     const {
       id,
       messages,
       selectedChatModel,
-    }: {
-      id: string;
-      messages: Array<UIMessage>;
-      selectedChatModel: string;
-    } = await request.json();
-
+    } = body;
+    
+    console.log(`Processing chat: ${id}, model: ${selectedChatModel}`);
+    
     const session = await auth();
+    console.log('Auth completed, session exists:', !!session);
 
     if (!session || !session.user || !session.user.id) {
+      console.log('Unauthorized: No valid session');
       return new Response('Unauthorized', { status: 401 });
     }
 
@@ -158,9 +165,10 @@ export async function POST(request: Request) {
         return 'Oops, an error occurred!';
       },
     });
-  } catch (error) {
-    return new Response('An error occurred while processing your request!', {
-      status: 404,
+  } catch (error: any) {
+    console.error('Chat API error:', error);
+    return new Response(`Error processing request: ${error.message}`, {
+      status: 500,
     });
   }
 }
@@ -195,3 +203,17 @@ export async function DELETE(request: Request) {
     });
   }
 }
+
+// async function handleStructuredResponse(prompt: string) {
+//   const { object } = await generateObject({
+//     model: myProvider.responseModels('responses-model'),
+//     schema: z.object({
+//       answer: z.string(),
+//       sources: z.array(z.string()).optional(),
+//       confidence: z.number().min(0).max(1).optional(),
+//     }),
+//     prompt,
+//   });
+  
+//   return object;
+// }

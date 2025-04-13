@@ -14,9 +14,19 @@
   "settings": {
     "import/resolver": {
       "typescript": {
-        "alwaysTryTypes": true
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      },
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
     }
   },
-  "ignorePatterns": ["**/components/ui/**"]
+  "ignorePatterns": ["**/components/ui/**"],
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact"]
 }
